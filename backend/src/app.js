@@ -7,6 +7,7 @@ import { csrfProtection } from './middleware/csrf.js';
 import { ipAllowlist } from './middleware/ipAllowlist.js';
 import { apiRateLimiter } from './middleware/rateLimit.js';
 
+import { authenticate, requireAdmin } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
 import serverRoutes from './routes/server.js';
@@ -17,6 +18,11 @@ import playersRoutes from './routes/players.js';
 import backupsRoutes from './routes/backups.js';
 import auditRoutes from './routes/audit.js';
 import settingsRoutes from './routes/settings.js';
+import playerPortalRoutes from './routes/playerPortal.js';
+import adminToolsRoutes from './routes/adminTools.js';
+import notificationsRoutes from './routes/notifications.js';
+
+const adminAuth = [authenticate, requireAdmin];
 
 const app = express();
 
@@ -44,15 +50,19 @@ app.use('/api/auth', authRoutes);
 
 app.use(csrfProtection);
 
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/server', serverRoutes);
-app.use('/api/console', consoleRoutes);
-app.use('/api/resources', resourcesRoutes);
-app.use('/api/config', configRoutes);
-app.use('/api/players', playersRoutes);
-app.use('/api/backups', backupsRoutes);
-app.use('/api/audit', auditRoutes);
-app.use('/api/settings', settingsRoutes);
+app.use('/api/player', playerPortalRoutes);
+app.use('/api/notifications', notificationsRoutes);
+
+app.use('/api/dashboard', ...adminAuth, dashboardRoutes);
+app.use('/api/server', ...adminAuth, serverRoutes);
+app.use('/api/console', ...adminAuth, consoleRoutes);
+app.use('/api/resources', ...adminAuth, resourcesRoutes);
+app.use('/api/config', ...adminAuth, configRoutes);
+app.use('/api/players', ...adminAuth, playersRoutes);
+app.use('/api/backups', ...adminAuth, backupsRoutes);
+app.use('/api/audit', ...adminAuth, auditRoutes);
+app.use('/api/settings', ...adminAuth, settingsRoutes);
+app.use('/api/admin', adminToolsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

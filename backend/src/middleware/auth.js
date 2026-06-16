@@ -69,8 +69,20 @@ export function requirePermission(permission) {
   };
 }
 
+export function requireAdmin(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+  if (req.user.role === 'player') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+}
+
+export function requirePlayer(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+  next();
+}
+
 export function clientIp(req) {
-  if (config.security.trustProxy) {
     const forwarded = req.headers['x-forwarded-for'];
     if (forwarded) return String(forwarded).split(',')[0].trim();
   }

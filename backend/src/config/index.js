@@ -81,6 +81,20 @@ const config = {
     trustProxy: parseBool(process.env.TRUST_PROXY, true),
   },
 
+  discord: {
+    clientId: process.env.DISCORD_CLIENT_ID || '',
+    clientSecret: process.env.DISCORD_CLIENT_SECRET || '',
+    redirectUri: process.env.DISCORD_REDIRECT_URI || `http://127.0.0.1:${process.env.PORT || '3001'}/api/auth/discord/callback`,
+    botToken: process.env.DISCORD_BOT_TOKEN || '',
+    guildId: process.env.DISCORD_GUILD_ID || '',
+    enabled: parseBool(process.env.DISCORD_OAUTH_ENABLED, false),
+    roleMap: {
+      owner: process.env.DISCORD_ROLE_OWNER || 'OWNER_ROLE_ID',
+      admin: process.env.DISCORD_ROLE_ADMIN || 'ADMIN_ROLE_ID',
+      moderator: process.env.DISCORD_ROLE_MODERATOR || 'MOD_ROLE_ID',
+    },
+  },
+
   paths: {
     migrations: path.resolve(__dirname, '../../../migrations'),
     configBackups: path.resolve(__dirname, '../../../data/config-backups'),

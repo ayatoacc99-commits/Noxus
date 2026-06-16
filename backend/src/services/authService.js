@@ -5,7 +5,18 @@ import config from '../config/index.js';
 import { getPanelPool } from '../db/pool.js';
 import { logAudit } from './auditService.js';
 
-const ROLES = ['owner', 'admin', 'moderator', 'viewer'];
+const ROLES = ['owner', 'admin', 'moderator', 'viewer', 'player'];
+
+export const ADMIN_ROLES = ['owner', 'admin', 'moderator', 'viewer'];
+export const PLAYER_ROLES = ['player'];
+
+export function isAdminRole(role) {
+  return ADMIN_ROLES.includes(role);
+}
+
+export function getRedirectForRole(role) {
+  return isAdminRole(role) ? '/dashboard' : '/player/dashboard';
+}
 
 export function isValidRole(role) {
   return ROLES.includes(role);
@@ -48,6 +59,11 @@ function formatUser(row) {
     totpSecret: row.totp_secret,
     lastLoginAt: row.last_login_at,
     createdAt: row.created_at,
+    discordId: row.discord_id || null,
+    discordUsername: row.discord_username || null,
+    discordAvatar: row.discord_avatar || null,
+    citizenid: row.citizenid || null,
+    authProvider: row.auth_provider || 'local',
   };
 }
 
@@ -119,7 +135,7 @@ export async function login(username, password, ipAddress, userAgent) {
     ipAddress,
   });
 
-  return { user: sanitizeUser(user), accessToken, refreshToken };
+  return { user: sanitizeUser(user), accessToken, refreshToken, redirectTo: getRedirectForRole(user.role) };
 }
 
 export function sanitizeUser(user) {
@@ -145,6 +161,10 @@ export const PERMISSIONS = {
   AUDIT_VIEW: 'audit_view',
   SETTINGS_MANAGE: 'settings_manage',
   USER_MANAGE: 'user_manage',
+  ECONOMY_MANAGE: 'economy_manage',
+  GANG_MANAGE: 'gang_manage',
+  LIVE_MONITOR: 'live_monitor',
+  PLAYER_PORTAL: 'player_portal',
 };
 
 export function roleCan(role, permission) {
@@ -160,6 +180,9 @@ export function roleCan(role, permission) {
       PERMISSIONS.PLAYER_BAN,
       PERMISSIONS.BACKUP_MANAGE,
       PERMISSIONS.AUDIT_VIEW,
+      PERMISSIONS.ECONOMY_MANAGE,
+      PERMISSIONS.GANG_MANAGE,
+      PERMISSIONS.LIVE_MONITOR,
     ],
     moderator: [
       PERMISSIONS.CONSOLE_COMMAND,
@@ -168,8 +191,10 @@ export function roleCan(role, permission) {
       PERMISSIONS.PLAYER_EDIT,
       PERMISSIONS.PLAYER_BAN,
       PERMISSIONS.AUDIT_VIEW,
+      PERMISSIONS.LIVE_MONITOR,
     ],
     viewer: [PERMISSIONS.PLAYER_VIEW, PERMISSIONS.AUDIT_VIEW],
+    player: [],
   };
   return matrix[role]?.includes(permission) ?? false;
 }
