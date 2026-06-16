@@ -1,12 +1,14 @@
 import { Router } from 'express';
-import { authenticate, requireAdmin, requirePermission, clientIp } from '../middleware/auth.js';
+import { authenticate, requireAdmin, requirePermission, requireCombatAccess, clientIp } from '../middleware/auth.js';
 import { PERMISSIONS } from '../services/authService.js';
 import { getLivePlayers, enrichLivePlayers, adminPlayerAction } from '../services/liveMonitorService.js';
 import { getResourcePerformance } from '../services/resourcePerformanceService.js';
 import { getEconomyOverview, getEconomyHistory, adminInjectMoney, adminRemoveMoney } from '../services/economyService.js';
 import { getGangOverview, getGangProfile } from '../services/gangService.js';
+import { getCombatLogs, getPlayerCombatStats, getCombatLeaderboard } from '../services/combatService.js';
 import { logAudit } from '../services/auditService.js';
 import { updatePlayerJob, updatePlayerGang } from '../services/playerService.js';
+import { isCombatLeaderboardType } from '../utils/combatAccess.js';
 
 const router = Router();
 router.use(authenticate, requireAdmin);
@@ -146,6 +148,83 @@ router.get('/gangs/:name', requirePermission(PERMISSIONS.GANG_MANAGE), async (re
     const gang = await getGangProfile(req.params.name);
     if (!gang) return res.status(404).json({ error: 'Gang not found' });
     res.json(gang);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/combat-logs', requireCombatAccess, async (req, res) => {
+  try {
+    const { citizenid, limit = 50, offset = 0 } = req.query;
+    const data = await getCombatLogs({
+      citizenid: citizenid || undefined,
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
+    });
+
+    await logAudit({
+      userId: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'VIEW_COMBAT_LOGS',
+      target: citizenid || 'all',
+      ipAddress: clientIp(req),
+    });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/combat-logs/:citizenid', requireCombatAccess, async (req, res) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+    const [logs, stats] = await Promise.all([
+      getCombatLogs({
+        citizenid: req.params.citizenid,
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10),
+      }),
+      getPlayerCombatStats(req.params.citizenid),
+    ]);
+
+    await logAudit({
+      userId: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'VIEW_COMBAT_LOGS',
+      target: req.params.citizenid,
+      ipAddress: clientIp(req),
+    });
+
+    res.json({ ...logs, stats: stats.stats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/combat-leaderboards', requireCombatAccess, async (req, res) => {
+  try {
+    const { type = 'kills', limit = 50, offset = 0 } = req.query;
+    const boardType = String(type).toLowerCase();
+
+    if (!isCombatLeaderboardType(boardType) && !['kills', 'deaths', 'kd'].includes(boardType)) {
+      return res.status(400).json({ error: 'Invalid combat leaderboard type' });
+    }
+
+    const data = await getCombatLeaderboard(boardType, parseInt(limit, 10), parseInt(offset, 10));
+
+    await logAudit({
+      userId: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'VIEW_COMBAT_LOGS',
+      target: `leaderboard:${boardType}`,
+      ipAddress: clientIp(req),
+    });
+
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -24,7 +24,7 @@ import { FadeIn } from '@/components/layout/PageTransition';
 
 export default function PlayerDetailPage() {
   const { citizenid } = useParams<{ citizenid: string }>();
-  const { canEdit } = useAuth();
+  const { canEdit, canViewCombatLogs } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [cash, setCash] = useState(0);
@@ -184,7 +184,12 @@ export default function PlayerDetailPage() {
             )}
 
             <Card className="lg:col-span-2">
-              <CardHeader><CardTitle>Metadata</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Metadata</CardTitle>
+                {!canViewCombatLogs && (
+                  <p className="text-xs text-noxus-muted">Combat-related fields are hidden from this view.</p>
+                )}
+              </CardHeader>
               <CardContent>
                 <pre className="text-xs font-mono bg-black/30 rounded-lg p-4 overflow-auto max-h-64 text-noxus-text-secondary">
                   {JSON.stringify(player.metadata, null, 2)}

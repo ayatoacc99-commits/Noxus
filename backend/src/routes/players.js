@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate, requirePermission, clientIp } from '../middleware/auth.js';
 import { PERMISSIONS } from '../services/authService.js';
+import { getSanitizedMetadataForRole } from '../services/combatService.js';
 import {
   searchPlayers,
   getPlayerByCitizenId,
@@ -68,7 +69,12 @@ router.get(
       const vehicles = await getPlayerVehicles(req.params.citizenid);
       const inventory = await getPlayerInventory(req.params.citizenid);
 
-      res.json({ ...result, notes, vehicles, inventory });
+      const player = {
+        ...result.player,
+        metadata: getSanitizedMetadataForRole(result.player.metadata, req.user.role),
+      };
+
+      res.json({ ...result, player, notes, vehicles, inventory });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+import { api, LeaderboardType } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
 import { PlayerPageHeader } from '@/components/player/PlayerComponents';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,13 +10,42 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { PageTransition } from '@/components/layout/PageTransition';
 
-const BOARDS = [
+const BOARDS: { id: LeaderboardType; label: string }[] = [
   { id: 'richest', label: 'Richest Players' },
   { id: 'hours', label: 'Most Hours' },
+  { id: 'vehicles', label: 'Most Vehicles' },
+  { id: 'houses', label: 'Most Houses' },
+  { id: 'job_level', label: 'Highest Job Level' },
+  { id: 'jobs_completed', label: 'Most Jobs Completed' },
+  { id: 'business', label: 'Business Rankings' },
+  { id: 'gang_territory', label: 'Gang Territory' },
 ];
 
+function formatBoardValue(type: LeaderboardType, entry: Record<string, unknown>) {
+  switch (type) {
+    case 'richest':
+      return formatMoney(entry.total as number);
+    case 'hours':
+      return `${entry.hours || entry.value || 0}h`;
+    case 'vehicles':
+      return `${entry.vehicles || entry.value || 0} vehicles`;
+    case 'houses':
+      return `${entry.houses || entry.value || 0} houses`;
+    case 'job_level':
+      return `Level ${entry.jobLevel || entry.value || 0}`;
+    case 'jobs_completed':
+      return `${entry.jobsCompleted || entry.value || 0} jobs`;
+    case 'business':
+      return `${entry.businessActivity || entry.value || 0} activity`;
+    case 'gang_territory':
+      return `${entry.territories || entry.value || 0} territories · ${entry.members || 0} members`;
+    default:
+      return String(entry.value ?? '—');
+  }
+}
+
 export default function PlayerLeaderboardsPage() {
-  const [type, setType] = useState('richest');
+  const [type, setType] = useState<LeaderboardType>('richest');
   const [search, setSearch] = useState('');
   const [entries, setEntries] = useState<Record<string, unknown>[]>([]);
   const [offset, setOffset] = useState(0);
@@ -32,13 +61,15 @@ export default function PlayerLeaderboardsPage() {
     return String(e.name).toLowerCase().includes(search.toLowerCase());
   });
 
+  const isGangBoard = type === 'gang_territory';
+
   return (
     <PageTransition>
-      <PlayerPageHeader title="Leaderboards" description="Server rankings" />
+      <PlayerPageHeader title="Leaderboards" description="Roleplay, economy, and progression rankings" />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <Input placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
-        <div className="flex gap-2">
+        <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <div className="flex flex-wrap gap-2">
           {BOARDS.map((b) => (
             <Button key={b.id} variant={type === b.id ? 'default' : 'ghost'} size="sm" onClick={() => { setType(b.id); setOffset(0); }}>
               {b.label}
@@ -53,19 +84,19 @@ export default function PlayerLeaderboardsPage() {
             <thead>
               <tr className="text-left text-noxus-muted border-b border-noxus-border bg-noxus-surface/50">
                 <th className="px-5 py-3">#</th>
-                <th className="px-5 py-3">Player</th>
-                <th className="px-5 py-3">Job</th>
+                <th className="px-5 py-3">{isGangBoard ? 'Gang' : 'Player'}</th>
+                {!isGangBoard && <th className="px-5 py-3">Job</th>}
                 <th className="px-5 py-3">Value</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((e) => (
-                <tr key={String(e.citizenid)} className="border-b border-noxus-border/50 hover:bg-white/5">
+                <tr key={String(e.citizenid || e.gang || e.name)} className="border-b border-noxus-border/50 hover:bg-white/5">
                   <td className="px-5 py-3"><Badge variant="outline">#{String(e.rank)}</Badge></td>
                   <td className="px-5 py-3 font-medium">{String(e.name)}</td>
-                  <td className="px-5 py-3 text-noxus-muted">{String(e.job || '—')}</td>
+                  {!isGangBoard && <td className="px-5 py-3 text-noxus-muted">{String(e.job || '—')}</td>}
                   <td className="px-5 py-3 text-noxus-success font-medium">
-                    {type === 'richest' ? formatMoney(e.total as number) : `${e.hours || 0}h`}
+                    {formatBoardValue(type, e)}
                   </td>
                 </tr>
               ))}

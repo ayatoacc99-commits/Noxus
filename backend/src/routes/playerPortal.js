@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, requirePlayer } from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 import { findUserById } from '../services/authService.js';
 import {
   findPlayerByCitizenId,
@@ -7,14 +7,16 @@ import {
   getPlayerVehicles,
   getPlayerHouses,
   getServerStats,
-  getPlayerStatistics,
+  getPlayerRpStatistics,
   getLeaderboard,
   getAchievements,
+  sanitizePlayerForPortal,
 } from '../services/playerPortalService.js';
 import { getEconomyOverview, getEconomyHistory } from '../services/economyService.js';
 import { getGangOverview } from '../services/gangService.js';
 import { getDashboardStatus } from '../services/metricsService.js';
 import { formatUptime } from '../utils/format.js';
+import { isCombatLeaderboardType, PUBLIC_LEADERBOARD_TYPES } from '../utils/combatAccess.js';
 
 const router = Router();
 router.use(authenticate);
@@ -38,14 +40,14 @@ router.get('/dashboard', async (req, res) => {
 
     const [player, stats, serverStats, status] = await Promise.all([
       findPlayerByCitizenId(citizenid),
-      getPlayerStatistics(citizenid),
+      getPlayerRpStatistics(citizenid),
       getServerStats(),
       getDashboardStatus(),
     ]);
 
     res.json({
       linked: true,
-      character: player,
+      character: sanitizePlayerForPortal(player),
       statistics: stats,
       server: {
         ...serverStats,
@@ -64,10 +66,10 @@ router.get('/profile', async (req, res) => {
     const citizenid = await resolveCitizenId(req);
     if (!citizenid) return res.json({ linked: false });
     const player = await findPlayerByCitizenId(citizenid);
-    const stats = await getPlayerStatistics(citizenid);
+    const stats = await getPlayerRpStatistics(citizenid);
     res.json({
       linked: true,
-      player,
+      player: sanitizePlayerForPortal(player),
       achievements: getAchievements(stats),
     });
   } catch (err) {
@@ -110,7 +112,7 @@ router.get('/statistics', async (req, res) => {
   try {
     const citizenid = await resolveCitizenId(req);
     if (!citizenid) return res.json({ linked: false });
-    const stats = await getPlayerStatistics(citizenid);
+    const stats = await getPlayerRpStatistics(citizenid);
     res.json({ linked: true, statistics: stats });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -132,7 +134,17 @@ router.get('/economy', async (req, res) => {
 router.get('/leaderboards', async (req, res) => {
   try {
     const { type = 'richest', limit = 50, offset = 0 } = req.query;
-    const data = await getLeaderboard(type, parseInt(limit, 10), parseInt(offset, 10));
+    const boardType = String(type).toLowerCase();
+
+    if (isCombatLeaderboardType(boardType)) {
+      return res.status(403).json({ error: 'Combat leaderboards are not publicly available' });
+    }
+
+    if (!PUBLIC_LEADERBOARD_TYPES.includes(boardType)) {
+      return res.status(400).json({ error: 'Invalid leaderboard type' });
+    }
+
+    const data = await getLeaderboard(boardType, parseInt(limit, 10), parseInt(offset, 10));
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });

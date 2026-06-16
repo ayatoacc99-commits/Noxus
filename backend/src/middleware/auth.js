@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
-import { findUserById, roleCan } from '../services/authService.js';
+import { findUserById, roleCan, canViewCombatLogs } from '../services/authService.js';
 
 export function authenticate(req, res, next) {
   const token =
@@ -79,6 +79,14 @@ export function requireAdmin(req, res, next) {
 
 export function requirePlayer(req, res, next) {
   if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+  next();
+}
+
+export function requireCombatAccess(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+  if (!canViewCombatLogs(req.user.role)) {
+    return res.status(403).json({ error: 'Combat log access restricted to owner and developer' });
+  }
   next();
 }
 

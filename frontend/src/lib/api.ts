@@ -87,7 +87,7 @@ export const api = {
   playerProperties: () => apiFetch('/api/player/properties'),
   playerStatistics: () => apiFetch('/api/player/statistics'),
   playerEconomy: () => apiFetch('/api/player/economy'),
-  playerLeaderboards: (type = 'richest', limit = 50, offset = 0) =>
+  playerLeaderboards: (type: LeaderboardType | string = 'richest', limit = 50, offset = 0) =>
     apiFetch(`/api/player/leaderboards?type=${type}&limit=${limit}&offset=${offset}`),
   playerGangs: () => apiFetch('/api/player/gangs'),
   // Admin tools
@@ -105,9 +105,29 @@ export const api = {
   adminEconomyRemove: (citizenid: string, amount: number, type = 'cash') =>
     apiFetch('/api/admin/economy/remove', { method: 'POST', body: JSON.stringify({ citizenid, amount, type }) }),
   adminGangs: () => apiFetch('/api/admin/gangs'),
+  adminCombatLogs: (params?: { citizenid?: string; limit?: number; offset?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.citizenid) q.set('citizenid', params.citizenid);
+    if (params?.limit) q.set('limit', String(params.limit));
+    if (params?.offset) q.set('offset', String(params.offset));
+    const query = q.toString();
+    return apiFetch(`/api/admin/combat-logs${query ? `?${query}` : ''}`);
+  },
+  adminCombatLogsForPlayer: (citizenid: string, limit = 50, offset = 0) =>
+    apiFetch(`/api/admin/combat-logs/${citizenid}?limit=${limit}&offset=${offset}`),
 };
 
-export type UserRole = 'owner' | 'admin' | 'moderator' | 'viewer' | 'player';
+export type LeaderboardType =
+  | 'richest'
+  | 'hours'
+  | 'vehicles'
+  | 'houses'
+  | 'job_level'
+  | 'jobs_completed'
+  | 'business'
+  | 'gang_territory';
+
+export type UserRole = 'owner' | 'developer' | 'admin' | 'moderator' | 'viewer' | 'player';
 
 export type User = {
   id: number;
@@ -119,9 +139,10 @@ export type User = {
   discordAvatar?: string;
   citizenid?: string;
   authProvider?: string;
+  canViewCombatLogs?: boolean;
 };
 
-export const ADMIN_ROLES: UserRole[] = ['owner', 'admin', 'moderator', 'viewer'];
+export const ADMIN_ROLES: UserRole[] = ['owner', 'developer', 'admin', 'moderator', 'viewer'];
 
 export function isAdminRole(role?: string) {
   return ADMIN_ROLES.includes(role as UserRole);

@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   UserIcon,
   BanknotesIcon,
   ClockIcon,
-  UsersIcon,
   ServerStackIcon,
 } from '@heroicons/react/24/outline';
 import { api } from '@/lib/api';
@@ -16,6 +14,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { PageTransition } from '@/components/layout/PageTransition';
+
+type RpStats = {
+  hoursPlayed?: number;
+  jobsCompleted?: number;
+  legalJobLevel?: number;
+  legalJobName?: string;
+  vehiclesOwned?: number;
+  housesOwned?: number;
+  businessActivity?: number;
+  economyRank?: number | null;
+  drivingDistance?: number;
+  craftingLevel?: number;
+  reputation?: number;
+  communityScore?: number | null;
+  cash?: number;
+  bank?: number;
+};
 
 export default function PlayerDashboardPage() {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
@@ -42,7 +57,7 @@ export default function PlayerDashboardPage() {
   }
 
   const character = data.character as Record<string, Record<string, unknown>>;
-  const stats = data.statistics as Record<string, number>;
+  const stats = data.statistics as RpStats;
   const server = data.server as Record<string, unknown>;
 
   return (
@@ -96,12 +111,16 @@ export default function PlayerDashboardPage() {
         </Card>
 
         <Card className="noxus-card-glow bg-noxus-card/80 backdrop-blur">
-          <CardHeader><CardTitle>Personal Stats</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Roleplay Progress</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 text-sm">
-            <Info label="Arrests" value={String(stats?.arrests || 0)} />
-            <Info label="Deaths" value={String(stats?.deaths || 0)} />
-            <Info label="Kills" value={String(stats?.kills || 0)} />
-            <Info label="Jobs Done" value={String(stats?.jobsCompleted || 0)} />
+            <Info label="Hours Played" value={String(stats?.hoursPlayed || 0)} />
+            <Info label="Jobs Completed" value={String(stats?.jobsCompleted || 0)} />
+            <Info label="Vehicles Owned" value={String(stats?.vehiclesOwned || 0)} />
+            <Info label="Houses Owned" value={String(stats?.housesOwned || 0)} />
+            <Info label="Economy Rank" value={stats?.economyRank ? `#${stats.economyRank}` : '—'} />
+            <Info label="Crafting Level" value={String(stats?.craftingLevel || 0)} />
+            <Info label="Reputation" value={String(stats?.reputation || 0)} />
+            <Info label="Legal Job Level" value={String(stats?.legalJobLevel || 0)} />
           </CardContent>
         </Card>
       </div>
