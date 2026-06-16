@@ -83,8 +83,9 @@ export function requirePlayer(req, res, next) {
 }
 
 export function clientIp(req) {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) return String(forwarded).split(',')[0].trim();
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return String(forwarded).split(',')[0].trim();
   }
   return req.socket.remoteAddress || null;
 }
