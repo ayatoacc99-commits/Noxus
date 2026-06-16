@@ -1,7 +1,6 @@
 import config from '../config/index.js';
 import { getPanelPool } from '../db/pool.js';
 import {
-  findUserByDiscordId,
   findUserById,
   createSession,
   signAccessToken,

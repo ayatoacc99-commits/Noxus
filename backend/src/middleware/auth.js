@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
-import { findUserById, roleCan } from './authService.js';
+import { findUserById, roleCan } from '../services/authService.js';
 
 export function authenticate(req, res, next) {
   const token =
