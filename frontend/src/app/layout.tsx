@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { AppShell } from '@/components/AppShell';
+import { RoleShell } from '@/components/RoleShell';
 
 export const metadata: Metadata = {
   title: 'Noxus Panel',
@@ -10,10 +10,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body>
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <RoleShell>{children}</RoleShell>
         </AuthProvider>
       </body>
     </html>

@@ -15,6 +15,10 @@ import {
   BookOpenIcon,
   LifebuoyIcon,
   ChatBubbleLeftRightIcon,
+  ChartBarIcon,
+  SignalIcon,
+  BanknotesIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,6 +31,10 @@ const mainNav = [
   { href: '/console', icon: CommandLineIcon, label: 'Console' },
   { href: '/players', icon: UsersIcon, label: 'Players' },
   { href: '/resources', icon: CubeIcon, label: 'Resources' },
+  { href: '/admin/performance', icon: ChartBarIcon, label: 'Performance' },
+  { href: '/admin/monitor', icon: SignalIcon, label: 'Live Monitor' },
+  { href: '/admin/economy', icon: BanknotesIcon, label: 'Economy' },
+  { href: '/admin/gangs', icon: UserGroupIcon, label: 'Gangs' },
   { href: '/database', icon: CircleStackIcon, label: 'Database' },
   { href: '/backups', icon: ArchiveBoxIcon, label: 'Backups' },
   { href: '/audit', icon: ClipboardDocumentListIcon, label: 'Audit Logs' },

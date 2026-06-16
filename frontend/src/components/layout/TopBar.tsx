@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import {
   MagnifyingGlassIcon,
-  BellIcon,
   Bars3Icon,
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
@@ -91,12 +91,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       </form>
 
       <div className="flex items-center gap-2 ml-auto">
-        <Button variant="ghost" size="icon" className="relative">
-          <BellIcon className="w-5 h-5" />
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-noxus-primary text-[10px] font-bold text-white">
-            3
-          </span>
-        </Button>
+        <NotificationCenter />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

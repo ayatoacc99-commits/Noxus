@@ -59,3 +59,7 @@ body {
 .log-error { @apply text-noxus-danger; }
 .log-command { @apply text-noxus-secondary; }
 .log-timestamp { @apply text-noxus-muted; }
+
+.glass {
+  @apply bg-noxus-card/60 backdrop-blur-xl border border-white/5;
+}
