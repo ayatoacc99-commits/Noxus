@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,31 +14,48 @@ body {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #252836 transparent;
+  scrollbar-color: #243044 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #243044;
+  border-radius: 3px;
 }
 
 @layer components {
-  .card {
-    @apply bg-noxus-card border border-noxus-border rounded-xl p-5;
+  .noxus-card {
+    @apply bg-noxus-card border border-noxus-border rounded-xl shadow-card;
   }
 
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  .noxus-card-glow {
+    @apply noxus-card transition-all duration-300 hover:shadow-glow hover:border-noxus-primary/30;
   }
 
-  .btn-primary {
-    @apply btn bg-noxus-accent hover:bg-noxus-accentHover text-white;
+  .noxus-input {
+    @apply w-full bg-noxus-surface border border-noxus-border rounded-lg px-3 py-2.5 text-sm text-noxus-text placeholder:text-noxus-muted focus:outline-none focus:ring-2 focus:ring-noxus-primary/40 focus:border-noxus-primary/50 transition-all;
   }
 
-  .btn-danger {
-    @apply btn bg-noxus-danger/20 hover:bg-noxus-danger/30 text-noxus-danger border border-noxus-danger/30;
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
   }
 
-  .btn-ghost {
-    @apply btn bg-noxus-surface hover:bg-noxus-border text-noxus-text border border-noxus-border;
+  .status-dot-online {
+    @apply status-dot bg-noxus-success shadow-[0_0_8px_rgba(16,185,129,0.6)];
   }
 
-  .input {
-    @apply w-full bg-noxus-surface border border-noxus-border rounded-lg px-3 py-2 text-noxus-text placeholder:text-noxus-muted focus:outline-none focus:ring-2 focus:ring-noxus-accent/50;
+  .status-dot-offline {
+    @apply status-dot bg-noxus-danger shadow-[0_0_8px_rgba(239,68,68,0.6)];
   }
 }
+
+/* Console syntax highlighting */
+.log-info { @apply text-slate-300; }
+.log-warn { @apply text-noxus-warning; }
+.log-error { @apply text-noxus-danger; }
+.log-command { @apply text-noxus-secondary; }
+.log-timestamp { @apply text-noxus-muted; }
