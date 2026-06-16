@@ -14,6 +14,7 @@ interface AuthContextType {
   canEdit: boolean;
   isPlayer: boolean;
   isAdmin: boolean;
+  canViewCombatLogs: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -47,6 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (u.role === 'player' && isAdminRoute) {
       router.replace('/player/dashboard');
+    } else if (path.startsWith('/admin/combat-logs') && !u.canViewCombatLogs) {
+      router.replace('/dashboard');
     } else if (isAdminRole(u.role) && isPlayerRoute && !path.includes('/settings')) {
       // Admins can still visit player portal if they want
     }
@@ -55,7 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     await api.getCsrf();
     const data = await api.login(username, password);
-    setUser(data.user);
+    setUser({
+      ...data.user,
+      canViewCombatLogs: data.user.canViewCombatLogs ?? (data.user.role === 'owner' || data.user.role === 'developer'),
+    });
     const redirect = data.redirectTo || getRedirectForRole(data.user.role);
     router.push(redirect);
     return redirect;
@@ -74,11 +80,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = isAdminRole(user?.role);
   const isPlayer = user?.role === 'player';
-  const canControl = user?.role === 'owner' || user?.role === 'admin';
+  const canControl = user?.role === 'owner' || user?.role === 'developer' || user?.role === 'admin';
   const canEdit = canControl || user?.role === 'moderator';
+  const canViewCombatLogs = Boolean(user?.canViewCombatLogs);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginDiscord, logout, canControl, canEdit, isPlayer, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, login, loginDiscord, logout, canControl, canEdit, isPlayer, isAdmin, canViewCombatLogs }}>
       {children}
     </AuthContext.Provider>
   );

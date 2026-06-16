@@ -19,6 +19,7 @@ import {
   SignalIcon,
   BanknotesIcon,
   UserGroupIcon,
+  ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,7 +55,14 @@ interface SidebarProps {
 
 export function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, canViewCombatLogs } = useAuth();
+
+  const navItems = [
+    ...mainNav,
+    ...(canViewCombatLogs
+      ? [{ href: '/admin/combat-logs', icon: ShieldExclamationIcon, label: 'Combat Logs' }]
+      : []),
+  ];
 
   const NavLink = ({ href, icon: Icon, label }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string }) => {
     const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
@@ -103,7 +111,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
         <div>
           <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-noxus-muted">Main</p>
           <div className="space-y-0.5 relative">
-            {mainNav.map((item) => (
+            {navItems.map((item) => (
               <NavLink key={item.href} {...item} />
             ))}
           </div>

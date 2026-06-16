@@ -5,9 +5,9 @@ import config from '../config/index.js';
 import { getPanelPool } from '../db/pool.js';
 import { logAudit } from './auditService.js';
 
-const ROLES = ['owner', 'admin', 'moderator', 'viewer', 'player'];
+const ROLES = ['owner', 'developer', 'admin', 'moderator', 'viewer', 'player'];
 
-export const ADMIN_ROLES = ['owner', 'admin', 'moderator', 'viewer'];
+export const ADMIN_ROLES = ['owner', 'developer', 'admin', 'moderator', 'viewer'];
 export const PLAYER_ROLES = ['player'];
 
 export function isAdminRole(role) {
@@ -165,11 +165,31 @@ export const PERMISSIONS = {
   GANG_MANAGE: 'gang_manage',
   LIVE_MONITOR: 'live_monitor',
   PLAYER_PORTAL: 'player_portal',
+  VIEW_COMBAT_LOGS: 'view_combat_logs',
 };
+
+export function canViewCombatLogs(role) {
+  return role === 'owner' || role === 'developer';
+}
 
 export function roleCan(role, permission) {
   const matrix = {
     owner: Object.values(PERMISSIONS),
+    developer: [
+      PERMISSIONS.SERVER_CONTROL,
+      PERMISSIONS.SERVER_CONFIG,
+      PERMISSIONS.CONSOLE_COMMAND,
+      PERMISSIONS.RESOURCE_MANAGE,
+      PERMISSIONS.PLAYER_VIEW,
+      PERMISSIONS.PLAYER_EDIT,
+      PERMISSIONS.PLAYER_BAN,
+      PERMISSIONS.BACKUP_MANAGE,
+      PERMISSIONS.AUDIT_VIEW,
+      PERMISSIONS.ECONOMY_MANAGE,
+      PERMISSIONS.GANG_MANAGE,
+      PERMISSIONS.LIVE_MONITOR,
+      PERMISSIONS.VIEW_COMBAT_LOGS,
+    ],
     admin: [
       PERMISSIONS.SERVER_CONTROL,
       PERMISSIONS.SERVER_CONFIG,

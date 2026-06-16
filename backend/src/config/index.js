@@ -90,6 +90,7 @@ const config = {
     enabled: parseBool(process.env.DISCORD_OAUTH_ENABLED, false),
     roleMap: {
       owner: process.env.DISCORD_ROLE_OWNER || 'OWNER_ROLE_ID',
+      developer: process.env.DISCORD_ROLE_DEVELOPER || 'DEV_ROLE_ID',
       admin: process.env.DISCORD_ROLE_ADMIN || 'ADMIN_ROLE_ID',
       moderator: process.env.DISCORD_ROLE_MODERATOR || 'MOD_ROLE_ID',
     },

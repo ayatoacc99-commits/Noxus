@@ -69,7 +69,7 @@ async function mapDiscordRolesToPanelRole(roleIds) {
   const pool = getPanelPool();
   const [mappings] = await pool.query('SELECT discord_role_id, panel_role FROM panel_discord_role_map');
 
-  const priority = { owner: 4, admin: 3, moderator: 2, player: 1 };
+  const priority = { owner: 5, developer: 4, admin: 3, moderator: 2, player: 1 };
   let bestRole = 'player';
 
   for (const map of mappings) {
@@ -82,6 +82,7 @@ async function mapDiscordRolesToPanelRole(roleIds) {
 
   // Env fallback role IDs
   if (roleIds.includes(config.discord.roleMap.owner)) bestRole = 'owner';
+  else if (roleIds.includes(config.discord.roleMap.developer)) bestRole = 'developer';
   else if (roleIds.includes(config.discord.roleMap.admin)) bestRole = 'admin';
   else if (roleIds.includes(config.discord.roleMap.moderator)) bestRole = 'moderator';
 
@@ -173,7 +174,7 @@ export async function handleDiscordCallback(code, ipAddress, userAgent) {
     },
     accessToken,
     refreshToken,
-    redirectTo: ['owner', 'admin', 'moderator', 'viewer'].includes(panelRole)
+    redirectTo: ['owner', 'developer', 'admin', 'moderator', 'viewer'].includes(panelRole)
       ? '/dashboard'
       : '/player/dashboard',
   };

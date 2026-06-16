@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import config from '../config/index.js';
-import { login, revokeSession, getRedirectForRole } from '../services/authService.js';
+import { login, revokeSession, getRedirectForRole, canViewCombatLogs } from '../services/authService.js';
 import { loginRateLimiter } from '../middleware/rateLimit.js';
 import { authenticate, clientIp } from '../middleware/auth.js';
 import { generateCsrfToken, setCsrfCookie } from '../middleware/csrf.js';
@@ -51,7 +51,7 @@ router.post('/login', loginRateLimiter, async (req, res) => {
 
     const csrfToken = setAuthCookies(res, accessToken, refreshToken);
 
-    res.json({ user, csrfToken, redirectTo });
+    res.json({ user: { ...user, canViewCombatLogs: canViewCombatLogs(user.role) }, csrfToken, redirectTo });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }
@@ -66,10 +66,16 @@ router.post('/logout', authenticate, async (req, res) => {
 });
 
 router.get('/me', authenticate, async (req, res) => {
-  const { findUserById, sanitizeUser } = await import('../services/authService.js');
+  const { findUserById, sanitizeUser, getRedirectForRole, canViewCombatLogs } = await import('../services/authService.js');
   const user = await findUserById(req.user.id);
   if (!user) return res.status(401).json({ error: 'User not found' });
-  res.json({ user: sanitizeUser(user), redirectTo: getRedirectForRole(user.role) });
+  res.json({
+    user: {
+      ...sanitizeUser(user),
+      canViewCombatLogs: canViewCombatLogs(user.role),
+    },
+    redirectTo: getRedirectForRole(user.role),
+  });
 });
 
 router.get('/discord', (req, res) => {
