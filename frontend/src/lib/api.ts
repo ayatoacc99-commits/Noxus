@@ -79,6 +79,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ reason }),
     }),
+  addNote: (citizenid: string, note: string) =>
+    apiFetch(`/api/players/${citizenid}/notes`, {
+      method: 'POST',
+      body: JSON.stringify({ note }),
+    }),
   backups: () => apiFetch('/api/backups'),
   createBackup: (types?: string[]) =>
     apiFetch('/api/backups/create', {
@@ -88,6 +93,7 @@ export const api = {
   deleteBackup: (id: number) => apiFetch(`/api/backups/${id}`, { method: 'DELETE' }),
   auditLogs: () => apiFetch('/api/audit'),
   settings: () => apiFetch('/api/settings'),
+  playerTables: () => apiFetch('/api/players/tables'),
 };
 
 export type User = {
