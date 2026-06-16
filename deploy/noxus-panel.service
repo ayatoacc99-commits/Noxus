@@ -1,0 +1,25 @@
+[Unit]
+Description=Noxus Panel API
+After=network.target mariadb.service
+Wants=mariadb.service
+
+[Service]
+Type=simple
+User=noxus
+Group=noxus
+WorkingDirectory=/opt/noxus-panel/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/noxus-panel/backend/.env
+ExecStart=/usr/bin/node src/index.js
+Restart=on-failure
+RestartSec=10
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/fivem /opt/noxus-panel/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
