@@ -1,0 +1,22 @@
+[Unit]
+Description=FiveM Server (QB-Core)
+After=network.target mariadb.service
+Wants=mariadb.service
+
+[Service]
+Type=simple
+User=fivem
+Group=fivem
+WorkingDirectory=/opt/fivem/server-data
+ExecStart=/opt/fivem/artifacts/run.sh +exec server.cfg
+ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=15
+StandardOutput=append:/opt/fivem/server-data/console.log
+StandardError=append:/opt/fivem/server-data/console.log
+
+# Resource limits (adjust for your VPS)
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

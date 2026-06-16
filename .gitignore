@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.next/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# Data (keep directory, ignore runtime files)
+data/*
+!data/.gitkeep
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Backups (local dev)
+*.tar.gz

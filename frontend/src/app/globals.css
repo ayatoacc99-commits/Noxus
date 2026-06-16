@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-noxus-bg text-noxus-text font-sans antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #252836 transparent;
+}
+
+@layer components {
+  .card {
+    @apply bg-noxus-card border border-noxus-border rounded-xl p-5;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-noxus-accent hover:bg-noxus-accentHover text-white;
+  }
+
+  .btn-danger {
+    @apply btn bg-noxus-danger/20 hover:bg-noxus-danger/30 text-noxus-danger border border-noxus-danger/30;
+  }
+
+  .btn-ghost {
+    @apply btn bg-noxus-surface hover:bg-noxus-border text-noxus-text border border-noxus-border;
+  }
+
+  .input {
+    @apply w-full bg-noxus-surface border border-noxus-border rounded-lg px-3 py-2 text-noxus-text placeholder:text-noxus-muted focus:outline-none focus:ring-2 focus:ring-noxus-accent/50;
+  }
+}
